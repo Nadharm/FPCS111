@@ -25,8 +25,8 @@
   ;; The description of the object as a list of individual
   ;; words, e.g. '("a" "red" "door").
   (define (description-word-list o)
-    (add-a-or-an (append (object-adjectives o)
-                         (list (noun o)))))
+    (cons "the" (append (object-adjectives o)
+                        (remove "room" (list (noun o))))))
   ;; description: object -> string
   ;; Generates a description of the object as a noun phrase, e.g. "a red door".
   (define (description o)
@@ -203,6 +203,27 @@
            (void))))
 
 ;;;
+;;; STAIRS
+;;; Like doors, but go between floors
+;;;
+
+(define-struct (stairs door)
+  ())
+
+;; join-floors: room string room string
+;; EFFECT: makes a flight of stairs with the specified adjectives
+;; connecting the specified rooms.
+
+(define (join-floors! room1 adjectives1 room2 adjectives2)
+  (local [(define r1->r2 (make-stairs (string->words adjectives1)
+                                      '() room1 room2))
+          (define r2->r1 (make-stairs (string->words adjectives2)
+                                      '() room2 room1))]
+    (begin (initialize-thing! r1->r2)
+           (initialize-thing! r2->r1)
+           (void))))
+
+;;;
 ;;; PERSON
 ;;; A character in the game.  The player character is a person.
 ;;;
@@ -350,38 +371,41 @@
 (define (start-game)
   ;; Fill this in with the rooms you want
   (local [(define room-1 (new-room "lobby"))
-          (define room-2 (new-room "living room"))
+          (define room-2 (new-room "living-room"))
           (define room-3 (new-room "kitchen"))
-          (define room-4 (new-room "dining room"))
-          (define room-5 (new-room "piano room"))
+          (define room-4 (new-room "dining-room"))
+          (define room-5 (new-room "piano-room"))
           (define room-6 (new-room "bathroom"))
           (define room-7 (new-room "hallway"))
-          (define room-8 (new-room "master bedroom"))
-          (define room-9 (new-room "guest room"))
+          (define room-8 (new-room "master-bedroom"))
+          (define room-9 (new-room "guest-room"))
           (define room-10 (new-room "storage"))
           (define room-11 (new-room "study"))
           (define room-12 (new-room "balcony"))
           (define room-13 (new-room "basement"))
-          (define room-14 (new-room "chamber"))]
+          (define room-14 (new-room "chamber"))
+          (define room-15 (new-room "cellar"))
+          (define room-16 (new-room "backyard"))
+          (define room-17 (new-room "shed"))]
     ;; Add join commands to connect your rooms with doors
     (begin (set! me (new-person "" room-1))
-           (join! room-1 "living room"
+           (join! room-1 "living-room"
                   room-2 "lobby")
-           (join! room-1 "piano room"
+           (join! room-1 "piano-room"
                   room-5 "lobby")
            (join! room-2 "kitchen"
-                  room-3 "living room")
-           (join! room-3 "dining room"
+                  room-3 "living-room")
+           (join! room-3 "dining-room"
                   room-4 "kitchen")
-           (join! room-4 "piano room"
-                  room-5 "dining room")
+           (join! room-4 "piano-room"
+                  room-5 "dining-room")
            (join! room-5 "bathroom"
-                  room-6 "dining room")
-           (join! room-1 "hallway"
-                  room-7 "lobby")
-           (join! room-7 "master bedroom"
+                  room-6 "dining-room")
+           (join-floors! room-1 "lobby"
+                         room-7 "hallway")
+           (join! room-7 "master-bedroom"
                   room-8 "hallway")
-           (join! room-7 "guest room"
+           (join! room-7 "guest-room"
                   room-9 "hallway")
            (join! room-7 "storage"
                   room-10 "hallway")
@@ -389,10 +413,18 @@
                   room-11 "hallway")
            (join! room-7 "balcony"
                   room-12 "hallway")
-           (join! room-5 "basement"
-                  room-13 "piano room")
+           (join-floors! room-5 "piano-room"
+                         room-13 "basement")
            (join! room-13 "chamber"
                   room-14 "basement")
+           (join! room-14 "cellar"
+                  room-15 "chamber")
+           (join! room-3 "backyard"
+                  room-16 "kitchen")
+           (join! room-16 "shed"
+                  room-17 "backyard")
+
+                  ;; Add code here to add things to your rooms
            (new-prop "statue"
                      "It's just standing there. Menancingly..."
                      room-1)
@@ -405,8 +437,6 @@
            (new-prop "cup"
                      "A cup. I can't think of anything more to say about it."
                      room-4)
-
-           ;; Add code here to add things to your rooms
            
            (check-containers!)
            (void))))
