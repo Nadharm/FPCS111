@@ -129,7 +129,6 @@
 (define-struct (room container)
   ())
 
-#:methods
 ;; new-room: string -> room
 ;; Makes a new room with the specified adjectives
 (define (new-room adjectives)
@@ -211,7 +210,6 @@
 (define-struct (person thing)
   ())
 
-#:methods
 ;; initialize-person: person -> void
 ;; EFFECT: do whatever initializations are necessary for persons.
 (define (initialize-person! p)
@@ -351,10 +349,15 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define starting-room (new-room ""))]
-    (begin (set! me (new-person "" starting-room))
+  (local [(define starting-room (new-room "lobby"))]
+    (begin (set! me (new-person "lobby" starting-room))
            ;; Add join commands to connect your rooms with doors
-
+           (join! (new-room "lobby") "" (new-room "living room") "")
+           (join! (new-room "lobby") "" (new-room "piano room") "")
+           (join! (new-room "kitchen") "" (new-room "living room") "")
+           (join! (new-room "dining room") "" (new-room "kitchen") "")
+           (join! (new-room "dining room") "" (new-room "piano room") "")
+           (join! (new-room "piano room") "" (new-room "bathroom") "")
            ;; Add code here to add things to your rooms
            
            (check-containers!)
@@ -566,6 +569,6 @@
 ;;; Start it up
 ;;;
 
-(start-game new-prop ("banana" room-1))
+(start-game)
 (look)
 
