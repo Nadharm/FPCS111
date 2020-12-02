@@ -367,8 +367,6 @@
     (begin (set! me (new-person "" room-1))
            (join! room-1 "living room"
                   room-2 "lobby")
-           (join! room-1 "kitchen"
-                  room-3 "lobby")
            (join! room-2 "kitchen"
                   room-3 "living room")
            (join! room-3 "dining room"
