@@ -349,15 +349,63 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define starting-room (new-room "lobby"))]
-    (begin (set! me (new-person "lobby" starting-room))
-           ;; Add join commands to connect your rooms with doors
-           (join! (new-room "lobby") "" (new-room "living room") "")
-           (join! (new-room "lobby") "" (new-room "piano room") "")
-           (join! (new-room "kitchen") "" (new-room "living room") "")
-           (join! (new-room "dining room") "" (new-room "kitchen") "")
-           (join! (new-room "dining room") "" (new-room "piano room") "")
-           (join! (new-room "piano room") "" (new-room "bathroom") "")
+  (local [(define room-1 (new-room "lobby"))
+          (define room-2 (new-room "living room"))
+          (define room-3 (new-room "kitchen"))
+          (define room-4 (new-room "dining room"))
+          (define room-5 (new-room "piano room"))
+          (define room-6 (new-room "bathroom"))
+          (define room-7 (new-room "hallway"))
+          (define room-8 (new-room "master bedroom"))
+          (define room-9 (new-room "guest room"))
+          (define room-10 (new-room "storage"))
+          (define room-11 (new-room "study"))
+          (define room-12 (new-room "balcony"))
+          (define room-13 (new-room "basement"))
+          (define room-14 (new-room "chamber"))]
+    ;; Add join commands to connect your rooms with doors
+    (begin (set! me (new-person "" room-1))
+           (join! room-1 "living room"
+                  room-2 "lobby")
+           (join! room-1 "kitchen"
+                  room-3 "lobby")
+           (join! room-2 "kitchen"
+                  room-3 "living room")
+           (join! room-3 "dining room"
+                  room-4 "kitchen")
+           (join! room-4 "piano room"
+                  room-5 "dining room")
+           (join! room-5 "bathroom"
+                  room-6 "dining room")
+           (join! room-1 "hallway"
+                  room-7 "lobby")
+           (join! room-7 "master bedroom"
+                  room-8 "hallway")
+           (join! room-7 "guest room"
+                  room-9 "hallway")
+           (join! room-7 "storage"
+                  room-10 "hallway")
+           (join! room-7 "study"
+                  room-11 "hallway")
+           (join! room-7 "balcony"
+                  room-12 "hallway")
+           (join! room-5 "basement"
+                  room-13 "piano room")
+           (join! room-13 "chamber"
+                  room-14 "basement")
+           (new-prop "statue"
+                     "It's just standing there. Menancingly..."
+                     room-1)
+           (new-prop "piano"
+                     "A rustic, old grand piano. Wonder if it still works."
+                     room-5)
+           (new-prop "window"
+                     "A beautiful day outside, besides the heavy downpour and wind."
+                     room-5)
+           (new-prop "cup"
+                     "A cup. I can't think of anything more to say about it."
+                     room-4)
+
            ;; Add code here to add things to your rooms
            
            (check-containers!)
@@ -366,10 +414,6 @@
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
 ;;;
-
-
-
-
 
 ;;;
 ;;; UTILITIES
