@@ -121,6 +121,7 @@
   (remove! (thing-location thing)
            thing))
 
+
 ;;;
 ;;; ROOM
 ;;; Base type for rooms and outdoor areas
@@ -172,6 +173,7 @@
     (begin (initialize-thing! thing)
            thing)))
 
+
 ;;;
 ;;; DOOR
 ;;; A portal from one room to another
@@ -188,7 +190,10 @@
   ;; EFFECT: Moves the player to the door's location and (look)s around.
   (define (go door)
     (begin (move! me (door-destination door))
-           (look))))
+           (look)))
+
+  (define (take door)
+    (print "You can't take that!")))
 
 ;; join: room string room string
 ;; EFFECT: makes a pair of doors with the specified adjectives
@@ -208,7 +213,12 @@
 ;;;
 
 (define-struct (person thing)
-  ())
+  ()
+
+  #:methods
+
+  (define (take person)
+    (print "You can't take that!")))
 
 ;; initialize-person: person -> void
 ;; EFFECT: do whatever initializations are necessary for persons.
@@ -251,7 +261,7 @@
     (display-line (prop-examine-text prop)))
 
   (define (take prop)
-    (move! prop (me)))
+    (move! prop me))
 
   (define (drop prop)
     (move! prop (here)))
@@ -279,7 +289,11 @@
 ;;;
 
 (define-struct (stairs door)
-  ())
+  ()
+
+  #:methods
+  (define (take stairs)
+    (print "You can't take that!")))
 
 ;; join-floors: room string room string
 ;; EFFECT: makes a flight of stairs with the specified adjectives
@@ -313,7 +327,10 @@
     (furniture-noun-to-print furniture))
 
   (define (examine furniture)
-    (display-line (furniture-examine-text furniture))))
+    (display-line (furniture-examine-text furniture)))
+
+  (define (take furniture)
+    (print "You can't take that!")))
 
 ;; new-furniture: string container -> prop
 ;; Makes a new piece of furniture with the specified description.
