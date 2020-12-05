@@ -482,6 +482,41 @@
 ;;;
 
 ;;;
+;;; ENDGAME CHECKS
+;;; Checks at the end of the day how prepared the player is
+;;;
+
+(define (weapons-person?)
+  "fill me in")
+
+(define (armour-person?)
+  "fill me in")
+
+(define (location-person?)
+  "fill me in")
+
+(define (enemies-house?)
+  "fill me in")
+
+(define (calories-person?)
+  "fill me in")
+
+(define (potions-person?)
+  "fill me in")
+
+(define (locked-house?)
+  "fill me in")
+
+(define (secured-house?)
+  "fill me in")
+
+(define (ammo-person?)
+  "fill me in")
+
+(define (success-person?)
+  "fill me in")
+
+;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
 
@@ -610,6 +645,23 @@
            
            (check-containers!)
            (void))))
+
+;;; end-game -> void
+;;; Runs the ending sequence to check if the player will survive the night.
+(define (end-game)
+  (begin (display-line "Your time has run out.")
+         (display-line "Now it's time to see how you have done.")
+         (display-line (string-append "Did you have weapons? " (weapons-person?)))
+         (display-line (string-append "Did you have armour? " (armour-person?)))
+         (display-line (string-append "Where did you spend the night? " (location-person?)))
+         (display-line (string-append "Were there enemies in the house? " (enemies-house?)))
+         (display-line (string-append "How many calories did you have? " (calories-person?)))
+         (display-line (string-append "Did you take any potions? " (potions-person?)))
+         (display-line (string-append "Did you lock all the doors? " (locked-house?)))
+         (display-line (string-append "Did you secure the windows and doors? " (secured-house?)))
+         (display-line (string-append "How much ammunition did you have? " (ammo-person?)))
+         (display-line (string-append "Did you survive the night? " (success-person?)))))
+
 
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
