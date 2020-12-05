@@ -473,9 +473,9 @@
            (new-furniture "piano"
                           "A rustic, old grand piano. Wonder if it still works."
                           room-5)
-           (new-prop "window"
-                     "A beautiful day outside, besides the heavy downpour and wind."
-                     room-5)
+           (new-furniture "window"
+                          "A beautiful day outside, besides the heavy downpour and wind."
+                          room-5)
            (new-prop "cup"
                      "A cup. I can't think of anything more to say about it."
                      room-4)
