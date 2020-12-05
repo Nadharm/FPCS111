@@ -369,7 +369,7 @@
     (calorie-accumulator food me))
 
   (define (calorie-accumulator food person)
-    (if (> (person-calorie-count person) 60)
+    (if (> (person-calorie-count person) 2500)
         (display-line "You can't eat anymore. You are full!")
         (begin (destroy! food)
                (set-person-calorie-count! person (+ (person-calorie-count person) (food-calories food)))
@@ -589,15 +589,24 @@
            (new-food "apple"
                      "A crunchy, red fruit. Healthy!"
                      room-3
-                     35)
+                     100)
            (new-food "banana"
                      "A yellow, bedtime snack. Also healthy!"
                      room-8
-                     30)
+                     125)
            (new-food "can of corn"
                      "Contains lots of fiber. Tons of healthy!"
                      room-4
-                     35)
+                     250)
+           (new-food "granola bar"
+                     "Man's best snack. That's an objective fact."
+                     room-10
+                     200)
+           (new-food "chocolate cake"
+                     "A half-eaten cake, topped with glorious amounts of chocolate. Unhealthy, but filling!"
+                     room-11
+                     2000)
+                     
            
            (check-containers!)
            (void))))
