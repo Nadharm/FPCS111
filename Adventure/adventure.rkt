@@ -389,7 +389,6 @@
            (initialize-thing! r2->r1)
            (void))))
 
-
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -479,48 +478,24 @@
           (define room-14 (new-room "chamber"))
           (define room-15 (new-room "cellar"))
           (define room-16 (new-room "backyard"))
-          (define room-17 (new-room "shed"))]
+          (define room-17 (new-room "shed"))
     
-    ;; Add code here to add things to your rooms
-    (begin (new-furniture "statue"
-                          "It's just standing there. Menancingly..."
-                          room-1)
-           (new-furniture "piano"
-                          "A rustic, old grand piano. Wonder if it still works."
-                          room-5)
-           (new-furniture "window"
-                          "A beautiful day outside, besides the heavy downpour and wind."
-                          room-5)
-           (new-prop "cup"
-                     "A cup. I can't think of anything more to say about it."
-                     room-4)
-           (new-prop "master-bedroom-key"
-                     "A key to the master bedroom on the second floor."
-                     room-5)
-           (new-prop "study-key"
-                     "A key to the study on the second floor."
-                     room-13)
-           (new-prop "cellar-key"
-                     "A mysterious, rusty key. It looks like it hasn't been used in a while."
-                     room-17)
-           (new-prop "shed-key"
-                     "A key to the shed outside."
-                     room-3)
-           (new-furniture "toilet"
-                          "A device for transporting waste to a secret, underground facility."
-                          room-6)
-           (new-food "apple"
-                     "A crunchy, red fruit. Healthy!"
-                     room-3)
-           (new-food "banana"
-                     "A yellow, bedtime snack. Also healthy!"
-                     room-8)
-           (new-food "can of corn"
-                     "Contains lots of fiber. Tons of healthy!"
-                     room-4)
+    ;; Setting up keys
+    (define master-bedroom-key (new-prop "master-bedroom-key"
+                                         "A key to the master bedroom on the second floor."
+                                         room-5))
+    (define study-key (new-prop "study-key"
+                                "A key to the study on the second floor."
+                                room-13))
+    (define cellar-key (new-prop "cellar-key"
+                                 "A mysterious, rusty key. It looks like it hasn't been used in a while."
+                                 room-17))
+    (define shed-key (new-prop "shed-key"
+                               "A key to the shed outside."
+                               room-3))]
     
-           ;; Add join commands to connect your rooms with doors
-           (set! me (new-person "" room-1))
+    ;; Add join commands to connect your rooms with doors
+    (begin (set! me (new-person "" room-1))
            (join! room-1 "living-room"
                   room-2 "lobby")
            (join! room-1 "piano-room"
@@ -544,7 +519,7 @@
                   room-10 "hallway")
            (join-locked-door! room-7 "study"
                               room-11 "hallway"
-                              "study-key")
+                              study-key)
            (join! room-7 "balcony"
                   room-12 "hallway")
            (join-floors! room-5 "piano-room"
@@ -553,12 +528,39 @@
                   room-14 "basement")
            (join-locked-door! room-14 "cellar"
                               room-15 "chamber"
-                              "cellar-key")
+                              cellar-key)
            (join! room-3 "backyard"
                   room-16 "kitchen")
            (join-locked-door! room-16 "shed"
                               room-17 "backyard"
-                              "shed-key")
+                              shed-key)
+
+           ;; Add code here to add things to your rooms
+           (new-furniture "statue"
+                          "It's just standing there. Menancingly..."
+                          room-1)
+           (new-furniture "piano"
+                          "A rustic, old grand piano. Wonder if it still works."
+                          room-5)
+           (new-furniture "window"
+                          "A beautiful day outside, besides the heavy downpour and wind."
+                          room-5)
+           (new-prop "cup"
+                     "A cup. I can't think of anything more to say about it."
+                     room-4)
+           
+           (new-furniture "toilet"
+                          "A device for transporting waste to a secret, underground facility."
+                          room-6)
+           (new-food "apple"
+                     "A crunchy, red fruit. Healthy!"
+                     room-3)
+           (new-food "banana"
+                     "A yellow, bedtime snack. Also healthy!"
+                     room-8)
+           (new-food "can of corn"
+                     "Contains lots of fiber. Tons of healthy!"
+                     room-4)
            
            (check-containers!)
            (void))))
