@@ -203,27 +203,6 @@
            (void))))
 
 ;;;
-;;; STAIRS
-;;; Like doors, but go between floors
-;;;
-
-(define-struct (stairs door)
-  ())
-
-;; join-floors: room string room string
-;; EFFECT: makes a flight of stairs with the specified adjectives
-;; connecting the specified rooms.
-
-(define (join-floors! room1 adjectives1 room2 adjectives2)
-  (local [(define r1->r2 (make-stairs (string->words adjectives1)
-                                      '() room1 room2))
-          (define r2->r1 (make-stairs (string->words adjectives2)
-                                      '() room2 room1))]
-    (begin (initialize-thing! r1->r2)
-           (initialize-thing! r2->r1)
-           (void))))
-
-;;;
 ;;; PERSON
 ;;; A character in the game.  The player character is a person.
 ;;;
@@ -269,7 +248,16 @@
     (prop-noun-to-print prop))
 
   (define (examine prop)
-    (display-line (prop-examine-text prop))))
+    (display-line (prop-examine-text prop)))
+
+  (define (take prop)
+    (move! prop (me)))
+
+  (define (drop prop)
+    (move! prop (here)))
+
+  (define (put prop container)
+    (move! prop container)))
 
 ;; new-prop: string container -> prop
 ;; Makes a new prop with the specified description.
@@ -285,12 +273,57 @@
 ;;; ADD YOUR TYPES HERE!
 ;;;
 
+;;;
+;;; STAIRS
+;;; Like doors, but go between floors
+;;;
 
+(define-struct (stairs door)
+  ())
 
+;; join-floors: room string room string
+;; EFFECT: makes a flight of stairs with the specified adjectives
+;; connecting the specified rooms.
 
+(define (join-floors! room1 adjectives1 room2 adjectives2)
+  (local [(define r1->r2 (make-stairs (string->words adjectives1)
+                                      '() room1 room2))
+          (define r2->r1 (make-stairs (string->words adjectives2)
+                                      '() room2 room1))]
+    (begin (initialize-thing! r1->r2)
+           (initialize-thing! r2->r1)
+           (void))))
 
+;;;
+;;; FURNITURE
+;;; A thing that exists as decoration or to be sat on. I'm almost jealous.
+;;;
 
+(define-struct (furniture thing)
+  (;; noun-to-print: string
+   ;; The user can set the noun to print in the description so it doesn't just say "prop"
+   noun-to-print
+   ;; examine-text: string
+   ;; Text to print if the player examines this object
+   examine-text
+   )
+  
+  #:methods
+  (define (noun furniture)
+    (furniture-noun-to-print furniture))
 
+  (define (examine furniture)
+    (display-line (furniture-examine-text furniture))))
+
+;; new-furniture: string container -> prop
+;; Makes a new piece of furniture with the specified description.
+(define (new-furniture description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define furniture (make-furniture adjectives '() location noun examine-text))]
+    (begin (initialize-thing! furniture)
+           furniture)))
 
 ;;;
 ;;; USER COMMANDS
@@ -316,24 +349,15 @@
 (define-user-command (examine thing)
   "Takes a closer look at the thing")
 
-(define (take thing)
-  (move! thing me))
+(define-user-command (take prop)
+  "Moves prop to your inventory")
 
-(define-user-command (take thing)
-  "Moves thing to your inventory")
+(define-user-command (drop prop)
+  "Removes prop from your inventory and places it in the room")
 
-(define (drop thing)
-  (move! thing (here)))
 
-(define-user-command (drop thing)
-  "Removes thing from your inventory and places it in the room
-")
-
-(define (put thing container)
-  (move! thing container))
-
-(define-user-command (put thing container)
-  "Moves the thing from its current location and puts it in the container.")
+(define-user-command (put prop container)
+  "Moves the prop from its current location and puts it in the container.")
 
 (define (help)
   (for-each (λ (command-info)
@@ -387,6 +411,7 @@
           (define room-15 (new-room "cellar"))
           (define room-16 (new-room "backyard"))
           (define room-17 (new-room "shed"))]
+    
     ;; Add join commands to connect your rooms with doors
     (begin (set! me (new-person "" room-1))
            (join! room-1 "living-room"
@@ -424,19 +449,22 @@
            (join! room-16 "shed"
                   room-17 "backyard")
 
-                  ;; Add code here to add things to your rooms
-           (new-prop "statue"
-                     "It's just standing there. Menancingly..."
-                     room-1)
-           (new-prop "piano"
-                     "A rustic, old grand piano. Wonder if it still works."
-                     room-5)
+           ;; Add code here to add things to your rooms
+           (new-furniture "statue"
+                          "It's just standing there. Menancingly..."
+                          room-1)
+           (new-furniture "piano"
+                          "A rustic, old grand piano. Wonder if it still works."
+                          room-5)
            (new-prop "window"
                      "A beautiful day outside, besides the heavy downpour and wind."
                      room-5)
            (new-prop "cup"
                      "A cup. I can't think of anything more to say about it."
                      room-4)
+           (new-furniture "toilet"
+                          "A device for transporting waste to a secret, underground facility."
+                          room-6)
            
            (check-containers!)
            (void))))
@@ -511,7 +539,7 @@
   (local [(define matches
             (filter predicate? list))]
     (case (length matches)
-      [(0) (error "There's nothing like that here")]
+      [(0) (error "There's nothing like that here!")]
       [(1) (first matches)]
       [else (error "Which one?")])))
 
