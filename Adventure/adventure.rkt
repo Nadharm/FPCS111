@@ -150,6 +150,10 @@
   (define (examine thing)
     (print-description thing))
 
+  ;;eat -> lets you know that you can't eat a thing unless it's a food
+  (define (eat thing)
+    (display-line "You can't eat this. It is inedible."))
+
   ;; prepare-to-move!: thing container -> void
   ;; Called by move when preparing to move thing into
   ;; container.  Normally, this does nothing, but
@@ -213,12 +217,21 @@
 ;;;
 
 (define-struct (person thing)
-  ()
+  (calorie-count)
 
   #:methods
 
   (define (take person)
-    (print "You can't take that!")))
+    (print "You can't take that!"))
+
+  (define (check-calories person)
+    (if (> (person-calorie-count person) 60)
+        (display-line "You are full!")
+        (display-line (+ (person-calorie-count person) 0)))
+    )
+  )
+
+
 
 ;; initialize-person: person -> void
 ;; EFFECT: do whatever initializations are necessary for persons.
@@ -227,11 +240,12 @@
 
 ;; new-person: string container -> person
 ;; Makes a new person object and initializes it.
-(define (new-person adjectives location)
+(define (new-person adjectives location calorie-total)
   (local [(define person
             (make-person (string->words adjectives)
                          '()
-                         location))]
+                         location
+                         0))]
     (begin (initialize-person! person)
            person)))
 
@@ -348,20 +362,23 @@
 ;;;
 
 (define-struct (food prop)
-  ()
+  (calories)
   
   #:methods
-  (define (eat food)
-    (begin (destroy! food)
-           (display-line "Yum!"))))
+  (define (eat food person)
+    (if (> (person-calorie-count person) 60)
+        (display-line "You can't eat anymore. You are full!")
+        (begin (destroy! food)
+               (set-person-calorie-count! person (+ (person-calorie-count person) (food-calories food)))
+               (display-line "Yum!")))))
 
 ;; new-food: string container -> food
 ;; Makes a new piece of food with the specified description.
-(define (new-food description examine-text location)
+(define (new-food description examine-text location calorie)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define food (make-food adjectives '() location noun examine-text))]
+          (define food (make-food adjectives '() location noun examine-text calorie))]
     (begin (initialize-thing! food)
            food)))
 
@@ -447,8 +464,15 @@
   "Throws an exception if condition is false.")
 
 ;;food
-(define-user-command (eat food)
-  "Destroys food and satiates your character.")
+(define-user-command (eat food person)
+  "Satiates the person.")
+
+;;checking-calories
+(define-user-command (check-calories person)
+  "Checks how many calories that person has. Max of 60.")
+
+
+
 
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
@@ -481,25 +505,25 @@
           (define room-16 (new-room "backyard"))
           (define room-17 (new-room "shed"))
     
-    ;; Setting up keys
-    (define master-bedroom-key (new-prop "master-bedroom-key"
-                                         "A key to the master bedroom on the second floor."
-                                         room-5))
-    (define study-key (new-prop "study-key"
-                                "A key to the study on the second floor."
-                                room-13))
-    (define cellar-key (new-prop "cellar-key"
-                                 "A mysterious, rusty key. It looks like it hasn't been used in a while."
-                                 room-17))
-    (define shed-key (new-prop "shed-key"
-                               "A key to the shed outside."
-                               room-3))
-    (define house-key (new-prop "house key"
-                                "A key into the lobby"
-                                room-1))]
+          ;; Setting up keys
+          (define master-bedroom-key (new-prop "master-bedroom-key"
+                                               "A key to the master bedroom on the second floor."
+                                               room-5))
+          (define study-key (new-prop "study-key"
+                                      "A key to the study on the second floor."
+                                      room-13))
+          (define cellar-key (new-prop "cellar-key"
+                                       "A mysterious, rusty key. It looks like it hasn't been used in a while."
+                                       room-17))
+          (define shed-key (new-prop "shed-key"
+                                     "A key to the shed outside."
+                                     room-3))
+          (define house-key (new-prop "house key"
+                                      "A key into the lobby"
+                                      room-1))]
     
     ;; Add join commands to connect your rooms with doors
-    (begin (set! me (new-person "" room-1))
+    (begin (set! me (new-person "" room-1 0))
            (join-locked-door! room-0 "lobby"
                               room-1 "front yard"
                               house-key)
@@ -561,13 +585,16 @@
                           room-6)
            (new-food "apple"
                      "A crunchy, red fruit. Healthy!"
-                     room-3)
+                     room-3
+                     35)
            (new-food "banana"
                      "A yellow, bedtime snack. Also healthy!"
-                     room-8)
+                     room-8
+                     30)
            (new-food "can of corn"
                      "Contains lots of fiber. Tons of healthy!"
-                     room-4)
+                     room-4
+                     35)
            
            (check-containers!)
            (void))))
