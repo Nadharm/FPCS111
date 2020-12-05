@@ -365,7 +365,10 @@
   (calories)
   
   #:methods
-  (define (eat food person)
+  (define (eat food)
+    (calorie-accumulator food me))
+
+  (define (calorie-accumulator food person)
     (if (> (person-calorie-count person) 60)
         (display-line "You can't eat anymore. You are full!")
         (begin (destroy! food)
