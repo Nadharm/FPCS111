@@ -241,7 +241,7 @@
 
 ;;;
 ;;; PROP
-;;; A thing in the game that doesn't serve any purpose other than to be there.
+;;; A thing in the game that can be held by the person.
 ;;;
 
 (define-struct (prop thing)
@@ -352,8 +352,8 @@
   
   #:methods
   (define (eat food)
-    (begin(destroy! food)
-          (display-line "Yum!"))))
+    (begin (destroy! food)
+           (display-line "Yum!"))))
 
 ;; new-food: string container -> food
 ;; Makes a new piece of food with the specified description.
@@ -364,6 +364,30 @@
           (define food (make-food adjectives '() location noun examine-text))]
     (begin (initialize-thing! food)
            food)))
+
+;;;
+;;; LOCKED DOOR
+;;; A door that joins together two rooms, but its initial state is locked.
+;;;
+
+(define-struct (locked-door door)
+  (key)
+
+  #:methods
+  (define (go door)
+    (if (have? (locked-door-key door))
+        (begin (move! me (door-destination door))
+               (look))
+        (print "You need the key to unlock this door!"))))
+
+(define (join-locked-door! room1 adjectives1 room2 adjectives2 key)
+  (local [(define r1->r2 (make-locked-door (string->words adjectives1)
+                                           '() room1 room2 key))
+          (define r2->r1 (make-locked-door (string->words adjectives2)
+                                           '() room2 room1 key))]
+    (begin (initialize-thing! r1->r2)
+           (initialize-thing! r2->r1)
+           (void))))
 
 
 ;;;
@@ -457,8 +481,46 @@
           (define room-16 (new-room "backyard"))
           (define room-17 (new-room "shed"))]
     
-    ;; Add join commands to connect your rooms with doors
-    (begin (set! me (new-person "" room-1))
+    ;; Add code here to add things to your rooms
+    (begin (new-furniture "statue"
+                          "It's just standing there. Menancingly..."
+                          room-1)
+           (new-furniture "piano"
+                          "A rustic, old grand piano. Wonder if it still works."
+                          room-5)
+           (new-furniture "window"
+                          "A beautiful day outside, besides the heavy downpour and wind."
+                          room-5)
+           (new-prop "cup"
+                     "A cup. I can't think of anything more to say about it."
+                     room-4)
+           (new-prop "master-bedroom-key"
+                     "A key to the master bedroom on the second floor."
+                     room-5)
+           (new-prop "study-key"
+                     "A key to the study on the second floor."
+                     room-13)
+           (new-prop "cellar-key"
+                     "A mysterious, rusty key. It looks like it hasn't been used in a while."
+                     room-17)
+           (new-prop "shed-key"
+                     "A key to the shed outside."
+                     room-3)
+           (new-furniture "toilet"
+                          "A device for transporting waste to a secret, underground facility."
+                          room-6)
+           (new-food "apple"
+                     "A crunchy, red fruit. Healthy!"
+                     room-3)
+           (new-food "banana"
+                     "A yellow, bedtime snack. Also healthy!"
+                     room-8)
+           (new-food "can of corn"
+                     "Contains lots of fiber. Tons of healthy!"
+                     room-4)
+    
+           ;; Add join commands to connect your rooms with doors
+           (set! me (new-person "" room-1))
            (join! room-1 "living-room"
                   room-2 "lobby")
            (join! room-1 "piano-room"
@@ -473,52 +535,30 @@
                   room-6 "dining-room")
            (join-floors! room-1 "lobby"
                          room-7 "hallway")
-           (join! room-7 "master-bedroom"
-                  room-8 "hallway")
+           (join-locked-door! room-7 "master-bedroom"
+                              room-8 "hallway"
+                              master-bedroom-key)
            (join! room-7 "guest-room"
                   room-9 "hallway")
            (join! room-7 "storage"
                   room-10 "hallway")
-           (join! room-7 "study"
-                  room-11 "hallway")
+           (join-locked-door! room-7 "study"
+                              room-11 "hallway"
+                              "study-key")
            (join! room-7 "balcony"
                   room-12 "hallway")
            (join-floors! room-5 "piano-room"
                          room-13 "basement")
            (join! room-13 "chamber"
                   room-14 "basement")
-           (join! room-14 "cellar"
-                  room-15 "chamber")
+           (join-locked-door! room-14 "cellar"
+                              room-15 "chamber"
+                              "cellar-key")
            (join! room-3 "backyard"
                   room-16 "kitchen")
-           (join! room-16 "shed"
-                  room-17 "backyard")
-
-           ;; Add code here to add things to your rooms
-           (new-furniture "statue"
-                          "It's just standing there. Menancingly..."
-                          room-1)
-           (new-furniture "piano"
-                          "A rustic, old grand piano. Wonder if it still works."
-                          room-5)
-           (new-furniture "window"
-                          "A beautiful day outside, besides the heavy downpour and wind."
-                          room-5)
-           (new-prop "cup"
-                     "A cup. I can't think of anything more to say about it."
-                     room-4)
-           (new-furniture "toilet"
-                          "A device for transporting waste to a secret, underground facility."
-                          room-6)
-           (new-food "apple"
-                     "A crunchy, red fruit. Healthy!"
-                     room-3)
-           (new-food "banana"
-                     "A yellow, bedtime snack. Also healthy!"
-                     room-8)
-           (new-food "can of corn"
-                     "Contains lots of fiber. Tons of healthy!"
-                     room-4)
+           (join-locked-door! room-16 "shed"
+                              room-17 "backyard"
+                              "shed-key")
            
            (check-containers!)
            (void))))
