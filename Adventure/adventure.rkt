@@ -342,6 +342,44 @@
     (begin (initialize-thing! furniture)
            furniture)))
 
+
+;;;
+;;; FOOD
+;;; A thing that a person can eat!
+;;;
+
+(define-struct (food thing)
+  (;; noun-to-print: string
+   ;; The user can set the noun to print in the description so it doesn't just say "prop"
+   noun-to-print
+   ;; examine-text: string
+   ;; Text to print if the player examines this object
+   examine-text
+   )
+  
+  #:methods
+  (define (noun food)
+    (food-noun-to-print food))
+
+  (define (examine food)
+    (display-line (food-examine-text food)))
+
+  (define (take food)
+    (move! food me))
+
+  (define (eat food)
+    (begin(destroy! food)
+            (display-line "yum"))))
+
+;; new-furniture: string container -> prop
+;; Makes a new piece of furniture with the specified description.
+(define (new-food description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define food (make-food adjectives '() location noun examine-text))]
+    (begin (initialize-thing! food)
+           food)))
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -398,6 +436,10 @@
 
 (define-user-command (check condition)
   "Throws an exception if condition is false.")
+
+;;food
+(define-user-command (eat food)
+  "Destroys food and satiates your character.")
 
 ;;;
 ;;; ADD YOUR COMMANDS HERE!
@@ -482,6 +524,15 @@
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
+           (new-food "apple"
+                     "A crunchy, red fruit. healthy."
+                     room-3)
+           (new-food "banana"
+                     "A yellow, bedtime snack. also healthy."
+                     room-8)
+           (new-food "can of corn"
+                     "Contains lots of fiber. tons of healthy."
+                     room-4)
            
            (check-containers!)
            (void))))
