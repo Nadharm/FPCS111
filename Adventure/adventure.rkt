@@ -332,7 +332,7 @@
   (define (take furniture)
     (print "You can't take that!")))
 
-;; new-furniture: string container -> prop
+;; new-furniture: string container -> furniture
 ;; Makes a new piece of furniture with the specified description.
 (define (new-furniture description examine-text location)
   (local [(define words (string->words description))
@@ -342,37 +342,21 @@
     (begin (initialize-thing! furniture)
            furniture)))
 
-
 ;;;
 ;;; FOOD
 ;;; A thing that a person can eat!
 ;;;
 
-(define-struct (food thing)
-  (;; noun-to-print: string
-   ;; The user can set the noun to print in the description so it doesn't just say "prop"
-   noun-to-print
-   ;; examine-text: string
-   ;; Text to print if the player examines this object
-   examine-text
-   )
+(define-struct (food prop)
+  ()
   
   #:methods
-  (define (noun food)
-    (food-noun-to-print food))
-
-  (define (examine food)
-    (display-line (food-examine-text food)))
-
-  (define (take food)
-    (move! food me))
-
   (define (eat food)
     (begin(destroy! food)
-            (display-line "yum"))))
+          (display-line "Yum!"))))
 
-;; new-furniture: string container -> prop
-;; Makes a new piece of furniture with the specified description.
+;; new-food: string container -> food
+;; Makes a new piece of food with the specified description.
 (define (new-food description examine-text location)
   (local [(define words (string->words description))
           (define noun (last words))
@@ -380,6 +364,8 @@
           (define food (make-food adjectives '() location noun examine-text))]
     (begin (initialize-thing! food)
            food)))
+
+
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -525,13 +511,13 @@
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
            (new-food "apple"
-                     "A crunchy, red fruit. healthy."
+                     "A crunchy, red fruit. Healthy!"
                      room-3)
            (new-food "banana"
-                     "A yellow, bedtime snack. also healthy."
+                     "A yellow, bedtime snack. Also healthy!"
                      room-8)
            (new-food "can of corn"
-                     "Contains lots of fiber. tons of healthy."
+                     "Contains lots of fiber. Tons of healthy!"
                      room-4)
            
            (check-containers!)
