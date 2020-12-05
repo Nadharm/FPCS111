@@ -386,6 +386,53 @@
            food)))
 
 ;;;
+;;; WEAPON
+;;; A thing that is used to attack enemies.
+;;;
+
+(define-struct (weapon container)
+  (damage speed durability ammunition)
+
+  #:methods
+  (define (attack enemy)
+    ("Insert here"))
+
+  (define (defend enemy)
+    ("insert here")))
+
+;;; new-weapon: string container -> weapon
+;;; Creates a new weapon with the specified description
+
+(define (new-weapon description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define weapon (make-weapon adjectives '() location noun examine-text))]
+    (begin (initialize-thing! weapon)
+           weapon)))
+
+;;;
+;;; ARMOR
+;;; A container that takes damage for the player without losing health
+;;;
+
+(define-struct (armor container)
+  (armor-value))
+
+;;;
+;;; new-armor: string container -> weapon
+;;; Creates a new armor with the specified description
+
+(define (new-armor description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define armor (make-armor adjectives '() location noun examine-text))]
+    (begin (initialize-thing! armor)
+           armor)))
+
+
+;;;
 ;;; LOCKED DOOR
 ;;; A door that joins together two rooms, but its initial state is locked.
 ;;;
