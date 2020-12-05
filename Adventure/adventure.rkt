@@ -462,7 +462,8 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define room-1 (new-room "lobby"))
+  (local [(define room-0 (new-room "front yard"))
+          (define room-1 (new-room "lobby"))
           (define room-2 (new-room "living-room"))
           (define room-3 (new-room "kitchen"))
           (define room-4 (new-room "dining-room"))
@@ -492,10 +493,16 @@
                                  room-17))
     (define shed-key (new-prop "shed-key"
                                "A key to the shed outside."
-                               room-3))]
+                               room-3))
+    (define house-key (new-prop "house key"
+                                "A key into the lobby"
+                                room-1))]
     
     ;; Add join commands to connect your rooms with doors
     (begin (set! me (new-person "" room-1))
+           (join-locked-door! room-0 "lobby"
+                              room-1 "front yard"
+                              house-key)
            (join! room-1 "living-room"
                   room-2 "lobby")
            (join! room-1 "piano-room"
