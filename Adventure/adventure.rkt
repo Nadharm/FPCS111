@@ -814,5 +814,12 @@
 ;;;
 
 (start-game)
+(begin (display-line "You have arrived at a house, and you have one objective: Survive.")
+       (display-line "The zombie apocalypse plunged the world into darkness for a long time now,")
+       (display-line "But you had no idea because you bunkered in your house since the virus in 2020.")
+       (display-line "All you know is that a wave of zombies is coming by this house in 24 hours,")
+       (display-line "And during that time, you'll have to do everything you can to protect yourself.")
+       (display-line "You open the door, and enter..."))
 (look)
+
 
