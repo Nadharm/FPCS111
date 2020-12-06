@@ -154,6 +154,22 @@
   (define (eat thing)
     (display-line "You can't eat this. It is inedible."))
 
+  (define (attack! thing person)
+    (display-line "You can't attack that. Why would you even want to?"))
+
+  (define (drink thing)
+    (display-line "You can't drink that. Sorry!"))
+
+  (define (solve! thing answer)
+    (display-line "There's nothing to solve here??"))
+
+  (define (activate! thing)
+    (display-line "You can't activate this... seriously what are you trying to do?"))
+
+  (define (equip! thing person)
+    (display-line "You cannot equip this, sorry!"))
+
+  
   ;; prepare-to-move!: thing container -> void
   ;; Called by move when preparing to move thing into
   ;; container.  Normally, this does nothing, but
@@ -248,7 +264,7 @@
                (display-line (prop-noun-to-print (person-equipped-weapon person))))))
 
   ;; equip! -> equips weapon if in inventory
-  (define (equip! person weapon)
+  (define (equip! weapon person)
     (if (have? weapon)
         (begin (set-person-equipped-weapon! person weapon)
                (display-line "Weapon equipped!"))
@@ -262,7 +278,7 @@
         #f))
 
   ;; attack -> fighting 
-  (define (attack! person enemy)
+  (define (attack! enemy person)
     (if (string? (person-equipped-weapon person))
         (display-line "Whoa! Find and equip a weapon first! You don't want to touch that with your bare hands!")
         (if (eq? (thing-location enemy)
@@ -874,13 +890,13 @@
 
 
 (define (attack enemy)
-  (attack! me enemy))
+  (attack! enemy me))
 
 (define-user-command (attack enemy)
   "This will attack the enemy")
 
 (define (equip weapon)
-  (equip! me weapon))
+  (equip! weapon me))
 
 (define-user-command (equip weapon)
   "This will equip a weapon")
@@ -892,7 +908,7 @@
   "Use this to activate and read the puzzle")
 
 (define (solve puzzle answer)
-  (solve! puzzle))
+  (solve! puzzle answer))
 
 (define-user-command (solve puzzle answer)
   "Use this to solve the puzzle. Input your answer as a string")
