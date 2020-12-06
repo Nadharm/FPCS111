@@ -465,7 +465,7 @@
         (if (empty? (enemy-item enemy))
             (begin (display-line "It's dead! Finally! Too bad it had nothing of value to loot.")
                    #t)
-            (begin (display-line "You've killed it! Oh? What's this? The enemy has dropped something!")
+            (begin (display-line "You've killed it! UwU? What's this? The enemy has dropped something!")
                    (move! (enemy-item enemy) (thing-location enemy))
                    #t)
             )
@@ -795,26 +795,28 @@
 ;;; A raging fire, consuming everything in reach!
 ;;;
 (define-struct (fireplace prop)
-  ()
+  (item)
   
   #:methods
-  (define (douse fireplace)
+   (define (douse fireplace)
     (if (have? (the cup of water))
-        (begin (display-line "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a journal. It's dedicated to John?")
+        (begin (display-line "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a half burnt picture.")
+               (display-line "It's an old picture of middle-aged man. On the bottom, someone has written 'I'm sorry, John'.")
+               (display-line "You also find a key labeled 'cellar' in the burnt remains. It looks to be damaged; hope it still works.")
                (destroy! (the cup of water))
-               (new-prop "journal"
-                         "A journal dedicated to John? He must be pretty important."
-                         me))
+               (new-prop "picture"
+                         "A picture of a man named John. I wonder what happened to him."
+                         me)
+               (move! (fireplace-item fireplace) me)) 
         (print "You don't have the means to douse the fire!"))))
 
-(define (new-fireplace description examine-text location)
+(define (new-fireplace description examine-text location key)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define fireplace (make-fireplace adjectives '() location noun examine-text))]
+          (define fireplace (make-fireplace adjectives '() location noun examine-text key))]
     (begin (initialize-thing! fireplace)
            fireplace)))
-
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -941,6 +943,9 @@
 ;;; Checks at the end of the day how prepared the player is
 ;;;
 
+(define (time-person?)
+  "fill me in")
+
 (define (weapons-person?)
   "fill me in")
 
@@ -979,7 +984,7 @@
 ;; Recreate the player object and all the rooms and things.
 (define (start-game)
   ;; Fill this in with the rooms you want
-  (local [(define room-0 (new-room "front yard"))
+  (local [(define room-0 (new-room "outside"))
           (define room-1 (new-room "lobby"))
           (define room-2 (new-room "living-room"))
           (define room-3 (new-room "kitchen"))
@@ -1007,29 +1012,22 @@
                                                room-100))
           (define study-key (new-prop "study-key"
                                       "A key to the study on the second floor."
-                                      room-13))
+                                      room-100))
           (define cellar-key (new-prop "cellar-key"
-                                       "A mysterious, rusty key. It looks like it hasn't been used in a while."
+                                       "A mysterious, rusty key. It looks like it's been damaged."
                                        room-100))
           (define shed-key (new-prop "shed-key"
                                      "A key to the shed outside."
-                                     room-3))
-          (define house-key (new-prop "house key"
+                                     room-11))
+          (define outside-key (new-prop "outside key"
                                       "A key into the lobby"
-                                      room-1))
-          (define overpowered-sword (new-weapon "OP sword"
-                                                "Jeez it's kinda OP"
-                                                room-100
-                                                50
-                                                4
-                                                1000))
-          ]
+                                      room-100))]
     
     ;; Add join commands to connect your rooms with doors
     (begin (set! me (new-person "" room-1 0 100))
            (join-locked-door! room-0 "lobby"
-                              room-1 "front yard"
-                              house-key)
+                              room-1 "outside"
+                              outside-key)
            (join! room-1 "living-room"
                   room-2 "lobby")
            (join! room-1 "piano-room"
@@ -1083,7 +1081,8 @@
                           room-5)
            (new-fireplace "fireplace"
                           "A raging fire illuminates the place. It looks like something is behind the flames, but it's too hot to reach past."
-                          room-2)
+                          room-2
+                          cellar-key)
            (new-cup "cup"
                      "A cup. I can't think of anything more to say about it."
                      room-4)
@@ -1184,7 +1183,7 @@
                       70
                       3
                       3
-                      overpowered-sword)
+                      outside-key)
                       
 
            ;;Puzzles
@@ -1199,14 +1198,14 @@
                        room-8
                        "There's nothing on the safe that indicates what the word is, but I imagine it's pretty important"
                        "John"
-                       cellar-key)
+                       study-key)
            
            (check-containers!)
            (void))))
 
-;;; end-day -> void
+;;; end-game -> void
 ;;; Runs the ending sequence to check if the player will survive the night.
-(define (end-day)
+(define (end-game)
   (begin (display-line "Your time has run out.")
          (display-line "Now it's time to see how you have done.")
          (display-line (string-append "Did you have weapons? " (weapons-person?)))
@@ -1218,12 +1217,60 @@
          (display-line (string-append "Did you lock all the doors? " (locked-house?)))
          (display-line (string-append "Did you secure the windows and doors? " (secured-house?)))
          (display-line (string-append "How much ammunition did you have? " (ammo-person?)))
-         (display-line (string-append "Did you survive the night? " (success-person?)))))
+         (display-line (string-append "How long did it take you to leave? " (time-person?)))
+         (display-line (string-append "Grade: " (success-person?)))))
 
 
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
 ;;;
+
+(define-walkthrough win
+  (go (the piano-room door))
+  (go (the dining-room door))
+  (take (the cup))
+  (go (the piano-room door))
+  (go (the bathroom door))
+  (fill (the cup))
+  (go (the piano-room door))
+  (go (the lobby door))
+  (go (the living-room door))
+  (examine (the painting))
+  (douse (the fireplace))
+  (go (the lobby door))
+  (go (the lobby stairs))
+  (go (the guest-room door))
+  (solve! (the mysterious box) "2023")
+  (go (the hallway door))
+  (go (the master-bedroom door))
+  (solve! (the safe) "John")
+  (go (the hallway door))
+  (go (the study door))
+  (take (the shed-key))
+  (go (the hallway door))
+  (go (the hallway stairs))
+  (go (the piano-room door))
+  (go (the dining-room door))
+  (go (the kitchen door))
+  (go (the backyard door))
+  (go (the shed door))
+  (take (the axe))
+  (equip (the axe))
+  (go (the backyard door))
+  (go (the kitchen door))
+  (go (the dining-room door))
+  (go (the piano-room door))
+  (go (the piano-room stairs))
+  (go (the chamber door))
+  (go (the cellar door))
+  (attack (the zombie))
+  (attack (the zombie))
+  (take (the outside key))
+  (go (the chamber door))
+  (go (the basement door))
+  (go (the basement stairs))
+  (go (the lobby door))
+  (go (the outside door)))
 
 ;;;
 ;;; UTILITIES
@@ -1424,12 +1471,10 @@
 ;;;
 
 (start-game)
-(begin (display-line "You have arrived at a house, and you have one objective: Survive.")
-       (display-line "The zombie apocalypse plunged the world into darkness for a long time now,")
-       (display-line "But you had no idea because you bunkered in your house since the virus in 2020.")
-       (display-line "All you know is that a wave of zombies is coming by this house in 24 hours,")
-       (display-line "And during that time, you'll have to do everything you can to protect yourself.")
-       (display-line "You open the door, and enter..."))
+(begin (display-line "You are trapped in a house, and you have one objective: Escape!")
+       (display-line "This house is riddled with enemies and puzzles, and in order to escape through the front door, you'll have to use your wits.")
+       (display-line "(Wits not included)")
+       (display-line "You only have an hour to do so, so make sure you don't waste any time!"))
 (look)
 
 
