@@ -788,9 +788,9 @@
            (check-containers!)
            (void))))
 
-;;; end-game -> void
+;;; end-day -> void
 ;;; Runs the ending sequence to check if the player will survive the night.
-(define (end-game)
+(define (end-day)
   (begin (display-line "Your time has run out.")
          (display-line "Now it's time to see how you have done.")
          (display-line (string-append "Did you have weapons? " (weapons-person?)))
