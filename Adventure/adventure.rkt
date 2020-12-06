@@ -217,18 +217,25 @@
 ;;;
 
 (define-struct (person thing)
-  (calorie-count)
+  (calorie-count health)
 
   #:methods
 
   (define (take person)
     (print "You can't take that!"))
 
+  ;;check-calories -> checks how many calories the peprson has
   (define (check-calories person)
-    (if (> (person-calorie-count person) 60)
+    (if (> (person-calorie-count person) 2500)
         (display-line "You are full!")
-        (display-line (+ (person-calorie-count person) 0)))
-    )
+        (display-line (+ (person-calorie-count person) 0))))
+
+  ;;check-health -> checks how much HP player has
+  (define (check-health person)
+    (if (> (person-health person) 100)
+        (display-line "You are completly healthy.")
+        (display-line (+ (person-health person) 0))))
+
   )
 
 
@@ -240,12 +247,13 @@
 
 ;; new-person: string container -> person
 ;; Makes a new person object and initializes it.
-(define (new-person adjectives location calorie-total)
+(define (new-person adjectives location calorie-total hPoints)
   (local [(define person
             (make-person (string->words adjectives)
                          '()
                          location
-                         0))]
+                         0
+                         100))]
     (begin (initialize-person! person)
            person)))
 
@@ -384,6 +392,34 @@
           (define food (make-food adjectives '() location noun examine-text calorie))]
     (begin (initialize-thing! food)
            food)))
+
+;;;
+;;; POTION
+;;; A thing that grants the user HP
+;;;
+
+(define-struct (potion prop)
+  (hpoints)
+
+  #:methods
+  (define (drink potion)
+    (drink-accumulator potion me))
+
+  (define (drink-accumulator potion person)
+    (if (>= (person-health person) 100)
+        (display-line "You can't drink this. You are full health.")
+        (begin (destroy! potion)
+               (set-person-health! person (+ (person-health person) (potion-hpoints potion)))
+               (display-line "Very satisfying!")))))
+
+  ;;new-potion
+  (define (new-potion description examine-text location hp)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define potion (make-potion adjectives '() location noun examine-text hp))]
+    (begin (initialize-thing! potion)
+           potion)))
 
 ;;;
 ;;; WEAPON
@@ -684,7 +720,7 @@
                                       room-1))]
     
     ;; Add join commands to connect your rooms with doors
-    (begin (set! me (new-person "" room-1 0))
+    (begin (set! me (new-person "" room-1 0 100))
            (join-locked-door! room-0 "lobby"
                               room-1 "front yard"
                               house-key)
@@ -728,6 +764,8 @@
                               shed-key)
 
            ;; Add code here to add things to your rooms
+           
+           ;;furniture/props
            (new-furniture "statue"
                           "It's just standing there. Menancingly..."
                           room-1)
@@ -744,6 +782,8 @@
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
+           
+           ;;food
            (new-food "apple"
                      "A crunchy, red fruit. Healthy!"
                      room-3
@@ -764,6 +804,25 @@
                      "A half-eaten cake, topped with glorious amounts of chocolate. Unhealthy, but filling!"
                      room-11
                      2000)
+           
+           ;;potions
+           (new-potion "blue potion"
+                       "A small potion - grants 20 health points."
+                       room-4
+                       20)
+           (new-potion "red potion"
+                       "A small potion - grants 20 health points."
+                       room-1
+                       20)
+           (new-potion "green potion"
+                       "A small potion - grants 20 health points."
+                       room-6
+                       20)
+           (new-potion "gold potion"
+                       "A big potion - grants 50 health points."
+                       room-10
+                       50)
+           ;;tools
            (new-tool "hammer"
                      "A hammer. You could use it to fight, or to hammer some nails."
                      room-16
