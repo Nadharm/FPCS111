@@ -165,7 +165,7 @@
 ;; initialize-thing!: thing -> void
 ;; EFFECT: adds thing to its initial location
 (define (initialize-thing! thing)(add! (thing-location thing)
-        thing))
+                                       thing))
 
 ;; new-thing: string container -> thing
 ;; Makes a new thing with the specified adjectives, in the specified location,
@@ -245,18 +245,95 @@
     (if (string? (person-equipped-weapon person))
         (display-line "You are currently equipping nothing! You might want to find a weapon! Quick!!!!")
         (begin (display-line "You are currently equipping: ")
-           (display-line (prop-noun-to-print (person-equipped-weapon person))))))
+               (display-line (prop-noun-to-print (person-equipped-weapon person))))))
 
   ;; equip -> equips weapon if in inventory
   (define (equip person weapon)
     (if (have? weapon)
-       (begin (set-person-equipped-weapon! person weapon)
-              (display-line "Weapon equipped!"))
-       (display-line "I don't have that weapon!")))
-  
-  )
-  
+        (begin (set-person-equipped-weapon! person weapon)
+               (display-line "Weapon equipped!"))
+        (display-line "I don't have that weapon!")))
 
+  ;; dead? -> check if player is dead
+  (define (dead? person)
+    (if (< (person-health person)1)
+        (begin (display-line "Oh no! It looks like you've died!")
+               #t)
+        #f))
+
+  ;; attack -> fighting 
+  (define (attack person enemy)
+    (if (string? (person-equipped-weapon person))
+        (display-line "Whoa! Find and equip a weapon first! You don't want to touch that with your bare hands!")
+        (if (eq? (thing-location enemy)
+                 (thing-location person))
+            (local[(define (attack-helper person ps enemy es)
+                     (if (> ps es)
+                         (begin (set-enemy-health! enemy
+                                                   (- (enemy-health enemy)
+                                                      (weapon-damage (person-equipped-weapon person))))
+                                (display-line "Your speed allows you to get a free shot at the enemy!")
+                                (printf "You deal ~a damage to ~a."
+                                        (weapon-damage (person-equipped-weapon person))
+                                        (enemy-name enemy))
+                                (display-line "")
+                                (display-line "")
+                                (if (dead? enemy)
+                                    (begin (remove! (thing-location enemy) enemy)
+                                           (void))
+                                    (attack-helper person (- ps 1) enemy es)))
+                         (if (< ps es)
+                             (begin (set-person-health! person
+                                                        (- (person-health person)
+                                                           (enemy-attack-damage enemy)))
+                                    (display-line "The enemy was too quick for you and damaged you!")
+                                    (printf "You take ~a damage from the ~a."
+                                            (enemy-attack-damage enemy)
+                                            (enemy-name enemy))
+                                    (display-line "")
+                                    (display-line "")
+                                    (if (dead? person)
+                                        ;; TO DO ONCE WE FINISH GAME
+                                        (display-line "INSERT END GAME")
+                                        (attack-helper person ps enemy (- es 1))))
+                             (if (= ps es)
+                                 (begin (set-enemy-health! enemy
+                                                           (- (enemy-health enemy)
+                                                              (weapon-damage (person-equipped-weapon person))))
+                                        (set-person-health! person
+                                                            (- (person-health person)
+                                                               (enemy-attack-damage enemy)))
+                                        (display-line "You both attack each other simultaneously")
+                                        (printf "You deal ~a damage to ~a."
+                                                (weapon-damage (person-equipped-weapon person))
+                                                (enemy-name enemy))
+                                        (display-line "")
+                                        (printf "You take ~a damage from the ~a."
+                                                (enemy-attack-damage enemy)
+                                                (enemy-name enemy))
+                                        (display-line "")
+                                        (display-line "")
+                                        (if (dead? enemy)
+                                            (begin (remove! (thing-location enemy) enemy)
+                                                   (void))
+                                            (if (= ps 1)
+                                                (begin (display-line "You separate yourself from the enemy giving you time to think.")
+                                                       (printf "You have ~a health points left. "
+                                                               (person-health person))
+                                                       (display-line "")
+                                                       (printf "~a has ~a health points left. "
+                                                               (enemy-name enemy)
+                                                               (enemy-health enemy)))
+                                                (attack-helper person (- ps 1) enemy (- es 1))))
+                                        )
+                                 (display-line "something odd must be going on...")))))]
+              (attack-helper person
+                             (weapon-speed (person-equipped-weapon person))
+                             enemy
+                             (enemy-attack-speed enemy)))
+            (display-line "That enemy is no where near me...")
+            )))
+  )
 
 
 ;; initialize-person: person -> void
@@ -282,6 +359,7 @@
 ;; This is the global variable that holds the person object representing
 ;; the player.  This gets reset by (start-game)
 (define me empty)
+
 
 ;;;
 ;;; PROP
@@ -326,6 +404,44 @@
 ;;;
 ;;; ADD YOUR TYPES HERE!
 ;;;
+
+;;;
+;;; ENEMY
+;;; An NPC that the player can fight
+;;;
+  
+(define-struct (enemy prop)
+  (name health attack-damage attack-speed)
+
+  #:methods
+  (define (dead? enemy)
+    (if (< (enemy-health enemy) 0)
+        (if (empty? (container-contents enemy))
+            (begin (display-line "It's dead! Finally! Too bad it had nothing of value to loot.")
+                   #t)
+            (begin (display-line "You've killed it! Oh? What's this? The enemy has dropped something!")
+                   (move! (container-contents enemy) (thing-location enemy))
+                   #t)
+            )
+        #f))
+  )
+
+;;new-enemy -> the way to make new enemies
+(define (new-enemy description examine-text location name health attack-damage attack-speed)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define enemy (make-enemy adjectives
+                                    '()
+                                    location
+                                    noun
+                                    examine-text
+                                    name
+                                    health
+                                    attack-damage
+                                    attack-speed))]
+    (begin (initialize-thing! enemy)
+           enemy)))
 
 ;;;
 ;;; STAIRS
@@ -434,8 +550,8 @@
                (set-person-health! person (+ (person-health person) (potion-hpoints potion)))
                (display-line "Very satisfying!")))))
 
-  ;;new-potion
-  (define (new-potion description examine-text location hp)
+;;new-potion
+(define (new-potion description examine-text location hp)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
@@ -873,9 +989,16 @@
                        15
                        2
                        100)
-                       
-                       
-           
+
+           ;;Enemies
+           (new-enemy "zombie"
+                      "It's looking at me funny..."
+                      room-1
+                      "Chad the Zombie"
+                      50
+                      2
+                      3)
+                      
 
            ;;Puzzles
            (new-puzzle "red puzzle box"
