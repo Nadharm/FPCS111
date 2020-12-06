@@ -287,7 +287,7 @@
                                                         (- (person-health person)
                                                            (enemy-attack-damage enemy)))
                                     (display-line "The enemy was too quick for you and damaged you!")
-                                    (printf "You take ~a damage from the ~a."
+                                    (printf "You take ~a damage from ~a."
                                             (enemy-attack-damage enemy)
                                             (enemy-name enemy))
                                     (display-line "")
@@ -308,7 +308,7 @@
                                                 (weapon-damage (person-equipped-weapon person))
                                                 (enemy-name enemy))
                                         (display-line "")
-                                        (printf "You take ~a damage from the ~a."
+                                        (printf "You take ~a damage from ~a."
                                                 (enemy-attack-damage enemy)
                                                 (enemy-name enemy))
                                         (display-line "")
@@ -742,10 +742,13 @@
   ()
   
   #:methods
-  (define (use cup)
-    (if (have? cup)
-        (begin (print "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a journal. It's dedicated to John?")
-               (destroy! cup))
+  (define (douse fireplace)
+    (if (have? (the cup of water))
+        (begin (display-line "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a journal. It's dedicated to John?")
+               (destroy! (the cup of water))
+               (new-prop "journal"
+                         "A journal dedicated to John? He must be pretty important."
+                         me))
         (print "You don't have the means to douse the fire!"))))
 
 (define (new-fireplace description examine-text location)
@@ -975,6 +978,9 @@
            (new-prop "painting"
                      "A large mural spanning across the wall. It's a horrible portrait of the zombie apocalypse, when it first broke out in 2023. Seems kind of tasteless."
                      room-2)
+           (new-prop "corpse"
+                     "The body of a man eaten alive, still gripping fervently to a machete."
+                     room-1)
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
@@ -1005,19 +1011,19 @@
            ;;potions
            (new-potion "blue potion"
                        "A small potion - grants 20 health points."
-                       room-4
+                       room-10
                        20)
            (new-potion "red potion"
                        "A small potion - grants 20 health points."
-                       room-1
+                       room-8
                        20)
            (new-potion "green potion"
                        "A small potion - grants 20 health points."
-                       room-6
+                       room-15
                        20)
            (new-potion "gold potion"
                        "A big potion - grants 50 health points."
-                       room-10
+                       room-11
                        50)
            ;;tools
            (new-tool "hammer"
@@ -1030,7 +1036,7 @@
            ;;Weapons
            (new-weapon "machete"
                        "There's a bit of rust on it... but it should hold up...?"
-                       room-1 ;;Lobby
+                       room-1
                        10
                        1
                        20)
@@ -1056,6 +1062,13 @@
                       "Chad the Zombie"
                       50
                       2
+                      3)
+           (new-enemy "zombie"
+                      "Strangely enough, it looks depressed, almost heartbroken."
+                      room-15
+                      "John"
+                      70
+                      3
                       3)
                       
 
