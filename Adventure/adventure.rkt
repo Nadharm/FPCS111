@@ -387,10 +387,10 @@
 
 ;;;
 ;;; WEAPON
-;;; A prop that is used to attack enemies.
+;;; A thing that is used to attack enemies.
 ;;;
 
-(define-struct (weapon prop)
+(define-struct (weapon container)
   (damage speed durability ammunition)
 
   #:methods
@@ -400,53 +400,34 @@
   (define (defend enemy)
     ("insert here")))
 
-;;; new-weapon: string prop -> weapon
+;;; new-weapon: string container -> weapon
 ;;; Creates a new weapon with the specified description
 
-(define (new-weapon description examine-text location speed durability ammunition)
+(define (new-weapon description examine-text location)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define weapon (make-weapon adjectives '() location noun examine-text speed durability ammunition))]
+          (define weapon (make-weapon adjectives '() location noun examine-text))]
     (begin (initialize-thing! weapon)
            weapon)))
 
 ;;;
-;;; TOOl
-;;; A weapon that has other uses around the house.
-;;;
-
-(define-struct (tool weapon)
-  ()
-
-;;; new-weapon: string container -> weapon
-;;; Creates a new weapon with the specified description
-
-(define (new-tool description examine-text location speed durability)
-  (local [(define words (string->words description))
-          (define noun (last words))
-          (define adjectives (drop-right words 1))
-          (define prop (make-weapon adjectives '() location noun examine-text speed durability))]
-    (begin (initialize-thing! prop)
-           prop)))
-
-;;;
 ;;; ARMOR
-;;; A prop that takes damage for the player without losing health
+;;; A container that takes damage for the player without losing health
 ;;;
 
-(define-struct (armor prop)
+(define-struct (armor container)
   (armor-value))
 
 ;;;
 ;;; new-armor: string container -> weapon
 ;;; Creates a new armor with the specified description
 
-(define (new-armor description examine-text location armor-value)
+(define (new-armor description examine-text location)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define armor (make-armor adjectives '() location noun examine-text armor-value))]
+          (define armor (make-armor adjectives '() location noun examine-text))]
     (begin (initialize-thing! armor)
            armor)))
 
@@ -764,12 +745,6 @@
                      "A half-eaten cake, topped with glorious amounts of chocolate. Unhealthy, but filling!"
                      room-11
                      2000)
-           (new-food "hammer"
-                     "A hammer. You could use it to fight, or to hammer some nails."
-                     room-16
-                     1
-                     1
-                     10)
            
 
            ;;Puzzles
