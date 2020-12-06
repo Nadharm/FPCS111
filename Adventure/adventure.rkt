@@ -754,7 +754,7 @@
                        "What color is the sky?"
                        "blue"
                        (new-food "Skittles"
-                                 "Taste the rainbow!"
+                                 "Ooooo! Taste the rainbow!"
                                  room-100
                                  100))
            
