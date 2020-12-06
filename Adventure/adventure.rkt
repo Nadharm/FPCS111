@@ -391,7 +391,7 @@
 ;;;
 
 (define-struct (weapon prop)
-  (damage speed durability ammunition)
+  (damage speed durability)
 
   #:methods
   (define (attack enemy)
@@ -403,11 +403,11 @@
 ;;; new-weapon: string prop -> weapon
 ;;; Creates a new weapon with the specified description
 
-(define (new-weapon description examine-text location speed durability ammunition)
+(define (new-weapon description examine-text location damage speed durability)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define weapon (make-weapon adjectives '() location noun examine-text speed durability ammunition))]
+          (define weapon (make-weapon adjectives '() location noun examine-text damage speed durability))]
     (begin (initialize-thing! weapon)
            weapon)))
 
@@ -417,18 +417,18 @@
 ;;;
 
 (define-struct (tool weapon)
-  ()
+  ())
 
 ;;; new-weapon: string container -> weapon
 ;;; Creates a new weapon with the specified description
 
-(define (new-tool description examine-text location speed durability)
+(define (new-tool description examine-text location damage speed durability)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define prop (make-weapon adjectives '() location noun examine-text speed durability))]
-    (begin (initialize-thing! prop)
-           prop)))
+          (define tool (make-tool adjectives '() location noun examine-text damage speed durability))]
+    (begin (initialize-thing! tool)
+           tool))) 
 
 ;;;
 ;;; ARMOR
@@ -767,7 +767,7 @@
            (new-tool "hammer"
                      "A hammer. You could use it to fight, or to hammer some nails."
                      room-16
-                     1
+                     2
                      1
                      10)
            
