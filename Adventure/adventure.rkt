@@ -470,7 +470,7 @@
            weapon)))
 
 ;;;
-;;; TOOl
+;;; TOOL
 ;;; A weapon that has other uses around the house.
 ;;;
 
@@ -588,6 +588,59 @@
            (void))))
 
 ;;;
+;;; CUP
+;;; A cup.
+;;;
+
+(define-struct (cup prop)
+  ())
+
+(define (filler cup person)
+  (if (and (have? cup)
+           (eq? (thing-location person) (thing-location (the toilet))))
+      (begin (print "You fill your cup with toilet water.")
+             (new-cup "cup of water"
+                      "A cup full of toilet water"
+                      me)
+             (destroy! cup))
+      (print "You can't do that!")))
+
+(define (fill cup)
+  (filler cup me))
+  
+
+;; Makes a new cup with the specified description.
+(define (new-cup description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define cup (make-cup adjectives '() location noun examine-text))]
+    (begin (initialize-thing! cup)
+           cup)))
+
+;;;
+;;; FIREPLACE
+;;; A raging fire, consuming everything in reach!
+;;;
+(define-struct (fireplace prop)
+  ()
+  
+  #:methods
+  (define (use cup)
+    (if (have? cup)
+        (begin (print "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a journal. It's dedicated to John?")
+               (destroy! cup))
+        (print "You don't have the means to douse the fire!"))))
+
+(define (new-fireplace description examine-text location)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define fireplace (make-fireplace adjectives '() location noun examine-text))]
+    (begin (initialize-thing! fireplace)
+           fireplace)))
+
+;;;
 ;;; USER COMMANDS
 ;;;
 
@@ -650,7 +703,7 @@
 
 ;;checking-calories
 (define-user-command (check-calories person)
-  "Checks how many calories that person has. Max of 60.")
+  "Checks how many calories that person has. Max of 2500.")
 
 
 
@@ -727,13 +780,13 @@
           ;; Setting up keys
           (define master-bedroom-key (new-prop "master-bedroom-key"
                                                "A key to the master bedroom on the second floor."
-                                               room-5))
+                                               room-100))
           (define study-key (new-prop "study-key"
                                       "A key to the study on the second floor."
                                       room-13))
           (define cellar-key (new-prop "cellar-key"
                                        "A mysterious, rusty key. It looks like it hasn't been used in a while."
-                                       room-17))
+                                       room-100))
           (define shed-key (new-prop "shed-key"
                                      "A key to the shed outside."
                                      room-3))
@@ -757,7 +810,7 @@
            (join! room-4 "piano-room"
                   room-5 "dining-room")
            (join! room-5 "bathroom"
-                  room-6 "dining-room")
+                  room-6 "piano-room")
            (join-floors! room-1 "lobby"
                          room-7 "hallway")
            (join-locked-door! room-7 "master-bedroom"
@@ -797,10 +850,15 @@
            (new-furniture "window"
                           "A beautiful day outside, besides the heavy downpour and wind."
                           room-5)
-           (new-prop "cup"
+           (new-fireplace "fireplace"
+                          "A raging fire illuminates the place. It looks like something is behind the flames, but it's too hot to reach past."
+                          room-2)
+           (new-cup "cup"
                      "A cup. I can't think of anything more to say about it."
                      room-4)
-           
+           (new-prop "painting"
+                     "A large mural spanning across the wall. It's a horrible portrait of the zombie apocalypse, when it first broke out in 2023. Seems kind of tasteless."
+                     room-2)
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
@@ -827,6 +885,7 @@
                      room-11
                      2000)
            
+           
            ;;potions
            (new-potion "blue potion"
                        "A small potion - grants 20 health points."
@@ -847,7 +906,7 @@
            ;;tools
            (new-tool "hammer"
                      "A hammer. You could use it to fight, or to hammer some nails."
-                     room-16
+                     room-17
                      2
                      1
                      40)
@@ -878,17 +937,18 @@
            
 
            ;;Puzzles
-           (new-puzzle "red puzzle box"
-                       "It looks red and confusing."
-                       room-1
-                       "What color is the sky?"
-                       "blue"
-                       (new-food "Skittles"
-                                 "Ooooo! Taste the rainbow!"
-                                 room-100
-                                 100))
-           
-                     
+           (new-puzzle "mysterious box"
+                       "The box is covered with dust. As you wipe away, you reveal a prompt."
+                       room-9
+                       "The year the world changed forever..."
+                       "2023"
+                       master-bedroom-key)
+           (new-puzzle "safe"
+                       "A safe is tucked away under the desk. It's a four-letter code combination."
+                       room-8
+                       "There's nothing on the safe that indicates what the word is, but I imagine it's pretty important"
+                       "John"
+                       cellar-key)
            
            (check-containers!)
            (void))))
