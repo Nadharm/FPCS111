@@ -433,6 +433,60 @@
 
 
 ;;;
+;;; PUZZLE
+;;; A puzzle that the player will solve to advance in the game
+;;;
+
+(define-struct (puzzle prop)
+  (;; question-text: string
+   ;; This is the question that the player must answer
+   question-text
+   ;; solution-text: string
+   ;; This is the solution to the puzzle/question
+   solution-text
+   ;; prize: unknown
+   prize
+   )
+  #:methods
+  ;; question: get the question-text
+  (define (question puzzle)
+    (puzzle-question-text puzzle))
+  ;; solution: get the solution-text
+  (define (solution puzzle)
+    (puzzle-solution-text puzzle))
+  ;; activate!: activate the puzzle
+  (define (activate! puzzle)
+    (begin (display-line "use the solve! function to input answer")
+           (display-line (question puzzle))
+           (void)))
+  ;; solve!: solve the puzzle
+  (define (solve! puzzle answer)
+    (if (string? answer)
+        (if (string=? answer
+                      (solution puzzle))
+            (begin (display-line "Wow! Well done!")
+                   (move! (puzzle-prize puzzle) me)
+                   (display-line "Your prize has been added to your inventory!")
+                   )
+            (display-line "Sorry! That was incorrect. Maybe try inputting the correct answer?")
+            )
+        (display-line "Sorry, you'll need to enter an answer in the form of a string")
+        )
+    ))
+
+;; new-puzzle: creates new puzzles
+(define (new-puzzle description examine-text location question solution prize)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define puzzle (make-puzzle adjectives '() location noun examine-text question solution prize))]
+    (begin (initialize-thing! puzzle)
+           puzzle)))
+
+
+
+
+;;;
 ;;; LOCKED DOOR
 ;;; A door that joins together two rooms, but its initial state is locked.
 ;;;
@@ -589,6 +643,9 @@
           (define room-15 (new-room "cellar"))
           (define room-16 (new-room "backyard"))
           (define room-17 (new-room "shed"))
+
+          ;;This will be room for prize items
+          (define room-100 (new-room "limbo"))
     
           ;; Setting up keys
           (define master-bedroom-key (new-prop "master-bedroom-key"
@@ -688,6 +745,19 @@
                      "A half-eaten cake, topped with glorious amounts of chocolate. Unhealthy, but filling!"
                      room-11
                      2000)
+           
+
+           ;;Puzzles
+           (new-puzzle "red puzzle box"
+                       "It looks red and confusing."
+                       room-1
+                       "What color is the sky?"
+                       "blue"
+                       (new-food "Skittles"
+                                 "Taste the rainbow!"
+                                 room-100
+                                 100))
+           
                      
            
            (check-containers!)
