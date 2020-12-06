@@ -217,7 +217,7 @@
 ;;;
 
 (define-struct (person thing)
-  (calorie-count)
+  (calorie-count health defense equipped-weapon)
 
   #:methods
 
@@ -229,7 +229,17 @@
         (display-line "You are full!")
         (display-line (+ (person-calorie-count person) 0)))
     )
-  )
+
+  (define (check-health person)
+    (display-line (person-health person)))
+
+  (define (check-defense person)
+    (display-line (person-defense person)))
+
+  (define (check-equipped-weapon person)
+    (begin (printf "You are currently equipping: ~%")
+           (printf (person-equipped-weapon person)))))
+  
 
 
 
@@ -245,7 +255,10 @@
             (make-person (string->words adjectives)
                          '()
                          location
-                         0))]
+                         0
+                         100
+                         0
+                         "Nothing"))]
     (begin (initialize-person! person)
            person)))
 
