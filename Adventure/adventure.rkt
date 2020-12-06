@@ -164,8 +164,7 @@
 
 ;; initialize-thing!: thing -> void
 ;; EFFECT: adds thing to its initial location
-(define (initialize-thing! thing)
-  (add! (thing-location thing)
+(define (initialize-thing! thing)(add! (thing-location thing)
         thing))
 
 ;; new-thing: string container -> thing
@@ -219,26 +218,43 @@
 (define-struct (person thing)
   (calorie-count health defense equipped-weapon)
 
+
   #:methods
 
   (define (take person)
     (print "You can't take that!"))
 
+  ;;check-calories -> checks how many calories the peprson has
   (define (check-calories person)
-    (if (> (person-calorie-count person) 60)
+    (if (> (person-calorie-count person) 2500)
         (display-line "You are full!")
-        (display-line (+ (person-calorie-count person) 0)))
-    )
+        (display-line (+ (person-calorie-count person) 0))))
 
+  ;;check-health -> checks how much HP player has
   (define (check-health person)
-    (display-line (person-health person)))
+    (if (> (person-health person) 100)
+        (display-line "You are completly healthy.")
+        (display-line (+ (person-health person) 0))))
 
+  ;;check-defense -> defense value
   (define (check-defense person)
     (display-line (person-defense person)))
 
+  ;;check-equipped-weapon -> what weapon are you holding?
   (define (check-equipped-weapon person)
-    (begin (printf "You are currently equipping: ~%")
-           (printf (person-equipped-weapon person)))))
+    (if (string? (person-equipped-weapon person))
+        (display-line "You are currently equipping nothing! You might want to find a weapon! Quick!!!!")
+        (begin (display-line "You are currently equipping: ")
+           (display-line (prop-noun-to-print (person-equipped-weapon person))))))
+
+  ;; equip -> equips weapon if in inventory
+  (define (equip person weapon)
+    (if (have? weapon)
+       (begin (set-person-equipped-weapon! person weapon)
+              (display-line "Weapon equipped!"))
+       (display-line "I don't have that weapon!")))
+  
+  )
   
 
 
@@ -250,7 +266,7 @@
 
 ;; new-person: string container -> person
 ;; Makes a new person object and initializes it.
-(define (new-person adjectives location calorie-total)
+(define (new-person adjectives location calorie-total hPoints)
   (local [(define person
             (make-person (string->words adjectives)
                          '()
@@ -259,6 +275,7 @@
                          100
                          0
                          "Nothing"))]
+    
     (begin (initialize-person! person)
            person)))
 
@@ -399,6 +416,34 @@
            food)))
 
 ;;;
+;;; POTION
+;;; A thing that grants the user HP
+;;;
+
+(define-struct (potion prop)
+  (hpoints)
+
+  #:methods
+  (define (drink potion)
+    (drink-accumulator potion me))
+
+  (define (drink-accumulator potion person)
+    (if (>= (person-health person) 100)
+        (display-line "You can't drink this. You are full health.")
+        (begin (destroy! potion)
+               (set-person-health! person (+ (person-health person) (potion-hpoints potion)))
+               (display-line "Very satisfying!")))))
+
+  ;;new-potion
+  (define (new-potion description examine-text location hp)
+  (local [(define words (string->words description))
+          (define noun (last words))
+          (define adjectives (drop-right words 1))
+          (define potion (make-potion adjectives '() location noun examine-text hp))]
+    (begin (initialize-thing! potion)
+           potion)))
+
+;;;
 ;;; WEAPON
 ;;; A prop that is used to attack enemies.
 ;;;
@@ -432,8 +477,8 @@
 (define-struct (tool weapon)
   ())
 
-;;; new-weapon: string container -> weapon
-;;; Creates a new weapon with the specified description
+;;; new-tool: string container -> weapon
+;;; Creates a new tool with the specified description
 
 (define (new-tool description examine-text location damage speed durability)
   (local [(define words (string->words description))
@@ -697,7 +742,7 @@
                                       room-1))]
     
     ;; Add join commands to connect your rooms with doors
-    (begin (set! me (new-person "" room-1 0))
+    (begin (set! me (new-person "" room-1 0 100))
            (join-locked-door! room-0 "lobby"
                               room-1 "front yard"
                               house-key)
@@ -741,6 +786,8 @@
                               shed-key)
 
            ;; Add code here to add things to your rooms
+           
+           ;;furniture/props
            (new-furniture "statue"
                           "It's just standing there. Menancingly..."
                           room-1)
@@ -757,6 +804,8 @@
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
+           
+           ;;food
            (new-food "apple"
                      "A crunchy, red fruit. Healthy!"
                      room-3
@@ -777,12 +826,55 @@
                      "A half-eaten cake, topped with glorious amounts of chocolate. Unhealthy, but filling!"
                      room-11
                      2000)
+           
+           ;;potions
+           (new-potion "blue potion"
+                       "A small potion - grants 20 health points."
+                       room-4
+                       20)
+           (new-potion "red potion"
+                       "A small potion - grants 20 health points."
+                       room-1
+                       20)
+           (new-potion "green potion"
+                       "A small potion - grants 20 health points."
+                       room-6
+                       20)
+           (new-potion "gold potion"
+                       "A big potion - grants 50 health points."
+                       room-10
+                       50)
+           ;;tools
            (new-tool "hammer"
                      "A hammer. You could use it to fight, or to hammer some nails."
                      room-16
                      2
                      1
-                     10)
+                     40)
+
+           ;;Weapons
+           (new-weapon "machete"
+                       "There's a bit of rust on it... but it should hold up...?"
+                       room-1 ;;Lobby
+                       10
+                       1
+                       20)
+
+           (new-weapon "knife"
+                       "Why is this knife so big? Who needs a knife this big?!?"
+                       room-3
+                       8
+                       3
+                       60)
+
+           (new-weapon "axe"
+                       "A really shiny, new-looking axe."
+                       room-17
+                       15
+                       2
+                       100)
+                       
+                       
            
 
            ;;Puzzles
@@ -801,9 +893,9 @@
            (check-containers!)
            (void))))
 
-;;; end-game -> void
+;;; end-day -> void
 ;;; Runs the ending sequence to check if the player will survive the night.
-(define (end-game)
+(define (end-day)
   (begin (display-line "Your time has run out.")
          (display-line "Now it's time to see how you have done.")
          (display-line (string-append "Did you have weapons? " (weapons-person?)))
