@@ -154,9 +154,6 @@
   (define (eat thing)
     (display-line "You can't eat this. It is inedible."))
 
-  (define (attack! thing person)
-    (display-line "You can't attack that. Why would you even want to?"))
-
   (define (drink thing)
     (display-line "You can't drink that. Sorry!"))
 
@@ -166,8 +163,6 @@
   (define (activate! thing)
     (display-line "You can't activate this... seriously what are you trying to do?"))
 
-  (define (equip! thing person)
-    (display-line "You cannot equip this, sorry!"))
 
   
   ;; prepare-to-move!: thing container -> void
@@ -264,7 +259,7 @@
                (display-line (prop-noun-to-print (person-equipped-weapon person))))))
 
   ;; equip! -> equips weapon if in inventory
-  (define (equip! weapon person)
+  (define (equip! person weapon)
     (if (have? weapon)
         (begin (set-person-equipped-weapon! person weapon)
                (display-line "Weapon equipped!"))
@@ -278,7 +273,7 @@
         #f))
 
   ;; attack -> fighting 
-  (define (attack! enemy person)
+  (define (attack! person enemy)
     (if (string? (person-equipped-weapon person))
         (display-line "Whoa! Find and equip a weapon first! You don't want to touch that with your bare hands!")
         (if (eq? (thing-location enemy)
@@ -892,13 +887,17 @@
 
 
 (define (attack enemy)
-  (attack! enemy me))
+  (if (enemy? enemy)
+      (attack! me enemy)
+      (display-line "You can't attack this... why would you even want to?")))
 
 (define-user-command (attack enemy)
   "This will attack the enemy")
 
 (define (equip weapon)
-  (equip! weapon me))
+  (if (weapon? weapon)
+      (equip! me weapon)
+      (display-line "You can't equip this.")))
 
 (define-user-command (equip weapon)
   "This will equip a weapon")
@@ -1199,6 +1198,12 @@
                        "There's nothing on the safe that indicates what the word is, but I imagine it's pretty important"
                        "John"
                        study-key)
+           (new-puzzle "test"
+                       "tester puzzle"
+                       room-1
+                       "Puzzle"
+                       "PUZZLE"
+                       '())
            
            (check-containers!)
            (void))))
