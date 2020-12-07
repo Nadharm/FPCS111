@@ -157,6 +157,9 @@
   (define (drink thing)
     (display-line "You can't drink that. Sorry!"))
 
+  (define (take thing)
+    (display-line "You can't take that. Please stop."))
+
   (define (solve! thing answer)
     (display-line "There's nothing to solve here??"))
 
@@ -458,6 +461,9 @@
   (name health attack-damage attack-speed item)
 
   #:methods
+  (define (take enemy)
+    (display-line "Why? Why have you done this? You can't do this."))
+  
   (define (dead? enemy)
     (if (< (enemy-health enemy) 0)
         (if (empty? (enemy-item enemy))
