@@ -163,6 +163,14 @@
   (define (activate! thing)
     (display-line "You can't activate this... seriously what are you trying to do?"))
 
+  (define (douse thing)
+    (display-line "How about you don't do that? Thanks."))
+
+  (define (go thing)
+    (display-line "You can only go to doors!"))
+
+  (define (fix thing weapon)
+    (display-line "You need to use a tool to fix things!"))
 
   
   ;; prepare-to-move!: thing container -> void
@@ -315,8 +323,7 @@
                                     (display-line "")
                                     (display-line "")
                                     (if (dead? person)
-                                        ;; TO DO ONCE WE FINISH GAME
-                                        (display-line "INSERT END GAME")
+                                        (death)
                                         (attack-helper person ps enemy (- es 1))))
                              (if (= ps es)
                                  (begin (set-enemy-health! enemy
@@ -340,8 +347,7 @@
                                         (display-line "")
                                         (display-line "")
                                         (if (dead? person)
-                                            ;;TO DO
-                                            (display-line "INSERT END GAME")
+                                            (death)
                                             (if (dead? enemy)
                                                 (begin (remove! (thing-location enemy) enemy)
                                                        (if (broken? (person-equipped-weapon person))
@@ -619,7 +625,7 @@
            (printf "Durability: ~a" (weapon-durability weapon))))
   
   (define (broken? weapon)
-    (if (< (weapon-durability weapon) 0)
+    (if (< (weapon-durability weapon) 1)
         (begin (remove! (thing-location weapon) weapon)
                #t)
         #f)))
@@ -642,16 +648,35 @@
 ;;;
 
 (define-struct (tool weapon)
-  ())
+  (d-boost)
+
+  #:methods
+  (define (fix tool weapon)
+    (if (tool? tool)
+        (if (weapon? weapon)
+            (begin (set-weapon-durability! weapon
+                                           (+ (weapon-durability weapon)
+                                              (tool-d-boost tool)))
+                   (set-weapon-durability! tool (- (weapon-durability tool) 1))
+                   (display-line "You restore some of your weapon's durability points")
+                   (if (broken? tool)
+                       (display-line "UwU your tool broke! D:")
+                       (void))
+                   (void))
+            (display-line "You need to use this on a weapon, silly! UwU")
+            )
+        (display-line "That's not a tool hehe UwU!")))
+    
+  )
 
 ;;; new-tool: string container -> weapon
 ;;; Creates a new tool with the specified description
 
-(define (new-tool description examine-text location damage speed durability)
+(define (new-tool description examine-text location damage speed durability d-boost)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define tool (make-tool adjectives '() location noun examine-text damage speed durability))]
+          (define tool (make-tool adjectives '() location noun examine-text damage speed durability d-boost))]
     (begin (initialize-thing! tool)
            tool))) 
 
@@ -817,9 +842,11 @@
 ;;;
 
 (define (look)
-  (begin (printf "You are in ~A.~%"
+  (begin (display-line "")
+         (printf "You are in ~A.~%"
                  (description (here)))
          (describe-contents (here))
+         (display-line "")
          (void)))
 
 (define-user-command (look) "Prints what you can see in the room")
@@ -934,6 +961,9 @@
 
 (define-user-command (stats weapon)
   "View the stats of a weapon")
+
+(define-user-command (fix tool weapon)
+  "Use this to use tools to fix up your weapons!")
 
 
 
@@ -1137,11 +1167,12 @@
                        50)
            ;;tools
            (new-tool "hammer"
-                     "A hammer. You could use it to fight, or to hammer some nails."
-                     room-17
+                     "A hammer. You could use it to fight, or to fix up your other weapons."
+                     room-1
                      2
                      1
-                     40)
+                     5
+                     10)
 
            ;;Weapons
            (new-weapon "machete"
@@ -1225,6 +1256,13 @@
          (display-line (string-append "How long did it take you to leave? " (time-person?)))
          (display-line (string-append "Grade: " (success-person?)))))
 
+;;; death -> void
+(define (death)
+  (begin (display-line "YOU'VE DIED!!!!!!!!!")
+         (display-line "HAHAHAHAHAHAHAHAAHAHAHAHA!!!")
+         (display-line "It's okay, I'm sure that monster was super strong.")
+         (display-line "Here, why don't you give the game another go?")
+         (start-game)))
 
 ;;;
 ;;; PUT YOUR WALKTHROUGHS HERE
