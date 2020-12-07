@@ -210,7 +210,7 @@
   #:methods
   ;; go: door -> void
   ;; EFFECT: Moves the player to the door's location and (look)s around.
-  (define (go door)
+  (define (go door)                                
     (begin (move! me (door-destination door))
            (look)))
 
@@ -296,7 +296,7 @@
                                         (weapon-damage (person-equipped-weapon person))
                                         (enemy-name enemy))
                                 (set-weapon-durability! (person-equipped-weapon person)
-                                                                (- (weapon-durability (person-equipped-weapon person)) 1))
+                                                        (- (weapon-durability (person-equipped-weapon person)) 1))
                                 (display-line "")
                                 (display-line "")
                                 (if (dead? enemy)
@@ -314,11 +314,11 @@
                              (begin (set-person-health! person
                                                         (- (person-health person)
                                                            (round (* (enemy-attack-damage enemy)
-                                                              (- 1 (person-defense person))))))
+                                                                     (- 1 (person-defense person))))))
                                     (display-line "The enemy was too quick for you and damaged you!")
                                     (printf "You take ~a damage from ~a."
                                             (round (* (enemy-attack-damage enemy)
-                                               (- 1 (person-defense person))))
+                                                      (- 1 (person-defense person))))
                                             (enemy-name enemy))
                                     (display-line "")
                                     (display-line "")
@@ -334,7 +334,7 @@
                                         (set-person-health! person
                                                             (- (person-health person)
                                                                (round (* (enemy-attack-damage enemy)
-                                                                  (- 1 (person-defense person))))))
+                                                                         (- 1 (person-defense person))))))
                                         (display-line "You both attack each other simultaneously")
                                         (printf "You deal ~a damage to ~a."
                                                 (weapon-damage (person-equipped-weapon person))
@@ -342,7 +342,7 @@
                                         (display-line "")
                                         (printf "You take ~a damage from ~a."
                                                 (round (* (enemy-attack-damage enemy)
-                                                   (- 1 (person-defense person))))
+                                                          (- 1 (person-defense person))))
                                                 (enemy-name enemy))
                                         (display-line "")
                                         (display-line "")
@@ -818,7 +818,7 @@
   (item)
   
   #:methods
-   (define (douse fireplace)
+  (define (douse fireplace)
     (if (have? (the cup of water))
         (begin (display-line "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a half burnt picture.")
                (display-line "It's an old picture of middle-aged man. On the bottom, someone has written 'I'm sorry, John'.")
@@ -837,6 +837,29 @@
           (define fireplace (make-fireplace adjectives '() location noun examine-text key))]
     (begin (initialize-thing! fireplace)
            fireplace)))
+
+;;;
+;;; BUTTON
+;;; A button that allows the player to end the game and get their grade.
+;;;
+
+(define-struct (button thing)
+  ()
+
+  #:methods
+  (define (press button)
+    (begin (display-line "---------------------------------------------------")
+           (display-line "You push the button, and everything turns to black.")
+           (display-line "A voice resonates from the emptiness.")
+           (display-line "'You have escaped that dreadful place...'")
+           (display-line "'But what lies in wait for you?'"))))
+           
+(define (new-button adjectives location)
+  (local [(define button (make-button (string->words adjectives)
+                                    '() location))]
+    (begin (initialize-thing! button)
+           button)))
+
 ;;;
 ;;; USER COMMANDS
 ;;;
@@ -966,45 +989,6 @@
   "Use this to use tools to fix up your weapons!")
 
 
-
-;;;
-;;; ENDGAME CHECKS
-;;; Checks at the end of the day how prepared the player is
-;;;
-
-(define (time-person?)
-  "fill me in")
-
-(define (weapons-person?)
-  "fill me in")
-
-(define (armour-person?)
-  "fill me in")
-
-(define (location-person?)
-  "fill me in")
-
-(define (enemies-house?)
-  "fill me in")
-
-(define (calories-person?)
-  "fill me in")
-
-(define (potions-person?)
-  "fill me in")
-
-(define (locked-house?)
-  "fill me in")
-
-(define (secured-house?)
-  "fill me in")
-
-(define (ammo-person?)
-  "fill me in")
-
-(define (success-person?)
-  "fill me in")
-
 ;;;
 ;;; THE GAME WORLD - FILL ME IN
 ;;;
@@ -1049,8 +1033,8 @@
                                      "A key to the shed outside."
                                      room-11))
           (define outside-key (new-prop "outside key"
-                                      "A key into the lobby"
-                                      room-100))]
+                                        "A key into the lobby"
+                                        room-100))]
     
     ;; Add join commands to connect your rooms with doors
     (begin (set! me (new-person "" room-1 0 100))
@@ -1113,10 +1097,10 @@
                           room-2
                           cellar-key)
            (new-cup "cup"
-                     "A cup. I can't think of anything more to say about it."
-                     room-4)
+                    "A cup. I can't think of anything more to say about it."
+                    room-4)
            (new-prop "painting"
-                     "A large mural spanning across the wall. It's a horrible portrait of the zombie apocalypse, when it first broke out in 2023. Seems kind of tasteless."
+                     "A large mural spanning across the wall. It's a horrible portrait of the zombie apocalypse, when it first broke out in 2020. Seems kind of tasteless."
                      room-2)
            (new-prop "corpse"
                      "The body of a man eaten alive, still gripping fervently to a machete."
@@ -1124,6 +1108,8 @@
            (new-furniture "toilet"
                           "A device for transporting waste to a secret, underground facility."
                           room-6)
+           (new-button "golden button"
+                       room-0)
            
            ;;food
            (new-food "apple"
@@ -1221,7 +1207,7 @@
                        "The box is covered with dust. As you wipe away, you reveal a prompt."
                        room-9
                        "The year the world changed forever..."
-                       "2023"
+                       "2020"
                        master-bedroom-key)
            (new-puzzle "safe"
                        "A safe is tucked away under the desk. It's a four-letter code combination."
@@ -1229,32 +1215,9 @@
                        "There's nothing on the safe that indicates what the word is, but I imagine it's pretty important"
                        "John"
                        study-key)
-           (new-puzzle "test"
-                       "tester puzzle"
-                       room-1
-                       "Puzzle"
-                       "PUZZLE"
-                       '())
            
            (check-containers!)
            (void))))
-
-;;; end-game -> void
-;;; Runs the ending sequence to check if the player will survive the night.
-(define (end-game)
-  (begin (display-line "Your time has run out.")
-         (display-line "Now it's time to see how you have done.")
-         (display-line (string-append "Did you have weapons? " (weapons-person?)))
-         (display-line (string-append "Did you have armour? " (armour-person?)))
-         (display-line (string-append "Where did you spend the night? " (location-person?)))
-         (display-line (string-append "Were there enemies in the house? " (enemies-house?)))
-         (display-line (string-append "How many calories did you have? " (calories-person?)))
-         (display-line (string-append "Did you take any potions? " (potions-person?)))
-         (display-line (string-append "Did you lock all the doors? " (locked-house?)))
-         (display-line (string-append "Did you secure the windows and doors? " (secured-house?)))
-         (display-line (string-append "How much ammunition did you have? " (ammo-person?)))
-         (display-line (string-append "How long did it take you to leave? " (time-person?)))
-         (display-line (string-append "Grade: " (success-person?)))))
 
 ;;; death -> void
 (define (death)
@@ -1283,7 +1246,7 @@
   (go (the lobby door))
   (go (the lobby stairs))
   (go (the guest-room door))
-  (solve! (the mysterious box) "2023")
+  (solve! (the mysterious box) "2020")
   (go (the hallway door))
   (go (the master-bedroom door))
   (solve! (the safe) "John")
@@ -1313,7 +1276,8 @@
   (go (the basement door))
   (go (the basement stairs))
   (go (the lobby door))
-  (go (the outside door)))
+  (go (the outside door))
+  (press (the golden button)))
 
 ;;;
 ;;; UTILITIES
