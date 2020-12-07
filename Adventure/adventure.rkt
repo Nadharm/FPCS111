@@ -825,7 +825,9 @@
   
   #:methods
   (define (douse fireplace)
-    (if (have? (the cup of water))
+    (if (have-a? (λ(n)
+                   (string=? (prop-noun-to-print n)
+                             "water")))
         (begin (display-line "You douse the fire with a cup of toilet water. You reach into the charred wood and retrieve a half burnt picture.")
                (display-line "It's an old picture of middle-aged man. On the bottom, someone has written 'I'm sorry, John'.")
                (display-line "You also find a key labeled 'cellar' in the burnt remains. It looks to be damaged; hope it still works.")
