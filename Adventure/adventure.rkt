@@ -160,6 +160,9 @@
   (define (solve! thing answer)
     (display-line "There's nothing to solve here??"))
 
+  (define (press thing)
+    (display-line "You can't press that!"))
+
   (define (activate! thing)
     (display-line "You can't activate this... seriously what are you trying to do?"))
 
