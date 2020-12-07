@@ -252,7 +252,9 @@
 
   ;;check-defense -> defense value
   (define (check-defense! person)
-    (display-line (person-defense person)))
+    (if (> (person-defense person) 1)
+        (display-line "Your armor has no cracks.")
+        (display-line (person-defense person))))
 
   ;;check-equipped-weapon -> what weapon are you holding?
   (define (check-equipped-weapon! person)
@@ -582,7 +584,7 @@
 ;;;
 
 (define-struct (potion prop)
-  (hpoints)
+  (hpoints dpoints)
 
   #:methods
   (define (drink potion)
@@ -593,14 +595,15 @@
         (display-line "You can't drink this. You are full health.")
         (begin (destroy! potion)
                (set-person-health! person (+ (person-health person) (potion-hpoints potion)))
+               (set-person-defense! person (+ (person-defense person) (potion-dpoints potion)))
                (display-line "Very satisfying!")))))
 
 ;;new-potion
-(define (new-potion description examine-text location hp)
+(define (new-potion description examine-text location hp armor)
   (local [(define words (string->words description))
           (define noun (last words))
           (define adjectives (drop-right words 1))
-          (define potion (make-potion adjectives '() location noun examine-text hp))]
+          (define potion (make-potion adjectives '() location noun examine-text hp armor))]
     (begin (initialize-thing! potion)
            potion)))
 
@@ -1108,22 +1111,31 @@
            
            
            ;;potions
-           (new-potion "blue potion"
+           (new-potion "blue-potion"
                        "A small potion - grants 20 health points."
                        room-10
-                       20)
-           (new-potion "red potion"
+                       20
+                       0)
+           (new-potion "red-potion"
                        "A small potion - grants 20 health points."
                        room-8
-                       20)
-           (new-potion "green potion"
-                       "A small potion - grants 20 health points."
+                       20
+                       0)
+           (new-potion "shiny-potion"
+                       "A small potion - grants .1 defense points."
                        room-15
-                       20)
-           (new-potion "gold potion"
+                       0
+                       0.1)
+           (new-potion "dull-potion"
+                       "A medium potion - grants .2 defense points."
+                       room-2
+                       0
+                       0.1)
+           (new-potion "gold-potion"
                        "A big potion - grants 50 health points."
                        room-11
-                       50)
+                       50
+                       0)
            ;;tools
            (new-tool "hammer"
                      "A hammer. You could use it to fight, or to hammer some nails."
