@@ -49,4 +49,4 @@ The same concept applies to stairs. Type (go (the stairs)) to move through a cer
 That's all the knowledge you need to fully navigate the mansion. Remember, your goal is to escape this place so make sure you find a way outside. 
 
 **HERE IS A MAP TO HELP YOU**:
-<img src="./manofinal-01.png">
+<img src="https://github.com/Nadharm/FPCS111/blob/main/manorfinal-01.png">
